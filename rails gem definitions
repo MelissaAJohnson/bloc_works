@@ -1,0 +1,17 @@
+# Gem Definitions
+Adopted from rubygems.org
+
+## ActiveModel
+A toolkit for building modeling frameworks like Active Record. Support for attributes, callbacks, validations, serialization, internationalization, and testing.
+
+## ActiveRecord
+Databases on Rails. Build a persistent domain model by mapping database tables to Ruby classes. Strong conventions for associations, validations, aggregations, migrations, and testing come baked-in.
+
+## ActiveSupport
+A toolkit of support libraries and Ruby core extensions extracted from the Rails framework. Support for multibyte strings, internationalization, time zones, and testing.
+
+## ActionPack
+Web apps on Rails. Simple, battle-tested conventions for building and testing MVC web applications. Works with any Rack-compatible server.
+
+## ActionMailer
+Email on Rails. Compose, deliver, receive, and test emails using the familiar controller/view pattern. Support for multipart email and attachments.
