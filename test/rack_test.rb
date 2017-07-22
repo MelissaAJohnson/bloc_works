@@ -17,8 +17,8 @@ class CallTest < Test::Unit::TestCase
 
   def set_request_headers
     get "/"
-    headers 'Content-Type', 'text/html'
     assert last_response.ok?
+    assert_equal "text/html", last_response.get_header("Content-Type")
     assert_equal last_response.body, "Hello Blocheads!"
   end
 
