@@ -16,7 +16,7 @@ module BlocWorks
     def controller_dir
       klass = self.class.to_s
       klass.slice!("Controller")
-      BlockWorks.snake_case(klass)
+      BlocWorks.snake_case(klass)
     end
   end
 end
