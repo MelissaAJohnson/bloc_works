@@ -9,7 +9,7 @@ module BlocWorks
     end
 
     def fav_icon(env)
-      if env["PATH_INFO"] == '/favicon.ico'
+      if env['PATH_INFO'] == '/favicon.ico'
         return [404, {'Content-Type' => 'text/html'}, []]
       end
     end
