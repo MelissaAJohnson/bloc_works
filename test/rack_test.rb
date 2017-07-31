@@ -10,16 +10,20 @@ class CallTest < Test::Unit::TestCase
   end
 
   def test_call
-    get "/"
+    get "/books/welcome"
     assert last_response.ok?
-    assert_equal last_response.body, "Hello Blocheads!"
+    assert_equal "text/html", last_response.body
   end
 
-  def set_request_headers
+  def test_request_headers
     get "/"
     assert last_response.ok?
     assert_equal "text/html", last_response.get_header("Content-Type")
-    assert_equal last_response.body, "Hello Blocheads!"
+  end
+
+  def test_favicon_page
+    get "/favicon.ico"
+    assert !last_response.ok?
   end
 
 end
