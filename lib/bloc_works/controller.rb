@@ -10,6 +10,9 @@ module BlocWorks
       filename = File.join("app", "views", controller_dir, "#{view}.html.erb")
       template = File.read(filename)
       eruby = Erubis::Eruby.new(template)
+			self.instance_variables.each do |var|
+				locals[var] = self.instance_variable_get(var)
+			end
       eruby.result(locals.merge(env: @env))
     end
 
@@ -18,5 +21,10 @@ module BlocWorks
       klass.slice!("Controller")
       BlocWorks.snake_case(klass)
     end
+    
   end
 end
+
+
+
+		

@@ -1,26 +1,22 @@
 require "bloc_works/version"
 require "bloc_works/dependencies"
 require "bloc_works/controller"
-require "bloc_works/router"
 require "bloc_works/utility"
+require "bloc_works/router"
 
 module BlocWorks
   class Application
-    def call(env)
-      #[200, {'Content-Type' => 'text/html'}, []]
-      response = fav_icon(env)
-
-      if(response)
-        return response
-      else
-        controller, action = controller_and_action(env)[0].new(env), controller_and_action(env)[1]
-        if controller.respond_to?(action)
-          var = controller.send(action)
-          [200, {'Content-Type' => 'text/html'}, [var]]
-        else
-          [404, {"Content-Type" => "text/plain"}, []]
-        end
-      end
-    end
+  	def call(env)
+  		response = self.fav_icon(env)
+  		
+  		if response
+  			return response
+  		else
+  			cont_array = self.controller_and_action(env)
+  			cont = cont_array.first.new(env)
+  			action_call = cont.send(cont_array.last)
+  			return [200, {'Content-Type' => 'text/html'}, [action_call]]
+  		end
+  	end
   end
 end
