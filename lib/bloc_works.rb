@@ -6,17 +6,14 @@ require "bloc_works/router"
 
 module BlocWorks
   class Application
-  	def call(env)
-  		response = self.fav_icon(env)
-  		
-  		if response
-  			return response
-  		else
-  			cont_array = self.controller_and_action(env)
-  			cont = cont_array.first.new(env)
-  			action_call = cont.send(cont_array.last)
-  			return [200, {'Content-Type' => 'text/html'}, [action_call]]
-  		end
-  	end
+    def call(env)
+      if env['PATH_INFO'] == '/favicon.ico'
+        return [404, {'Content-Type' => 'text/html'}, []]
+      end
+      
+      rack_app = get_rack_app(env)
+      rack_app.call(env)
+
+    end
   end
 end
