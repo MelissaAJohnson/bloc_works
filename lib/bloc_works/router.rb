@@ -35,81 +35,89 @@ module BlocWorks
     end
     
     def look_up_url(url)
-       @rules.each do |rule|
-         rule_match = rule[:regex].match(url)
+      rule = @rules.select{|x| x[:regex].match(url)}.first
+      rule_match = rule[:regex].match(url)
+      options = rule[:options]
+      params = options[:default].dup
+
+      rule[:vars].each_with_index do |var, index|
+        params[var] = rule_match.captures[index]
+      end
+
+      x = rule[:destination] ? rule[:destination] : "#{params["controller"]}##{params["action"]}"
+      return get_destination(x, params)
+    end
  
-         if rule_match
-           options = rule[:options]
-           params = options[:default].dup
+    def get_destination(destination, routing_params = {})
+      if destination.respond_to?(:call)
+        return destination
+      end
  
-           rule[:vars].each_with_index do |var, index|
-             params[var] = rule_match.captures[index]
-           end
- 
-           if rule[:destination]
-             return get_destination(rule[:destination], params)
-           else
-             controller = params["controller"]
-             action = params["action"]
-             return get_destination("#{controller}##{action}", params)
-           end
-         end
-       end
-     end
- 
-     def get_destination(destination, routing_params = {})
-       if destination.respond_to?(:call)
-         return destination
-       end
- 
-       if destination =~ /^([^#]+)#([^#]+)$/
-         name = $1.capitalize
-         controller = Object.const_get("#{name}Controller")
-         return controller.action($2, routing_params)
-       end
+      if destination =~ /^([^#]+)#([^#]+)$/
+        name = $1.capitalize
+        controller = Object.const_get("#{name}Controller")
+        return controller.action($2, routing_params)
+      end
        raise "Destination no found: #{destination}"
-     end
+    end
 
     # builds route/action rules and add them to @rules
     def map(url, *args)
-      puts "url: #{url}"
-      options = {}
-      options = args.pop if args[-1].is_a?(Hash)
-      options[:default] ||= {}
-      puts "options: #{options}"
-
-      destination = nil
-      destination = args.pop if args.size > 0
-      raise "Too many args!" if args.size > 0
-      puts "destination: #{destination}"
+      options = option_setter(args)
+      destination = destination_setter(args)
 
       parts = url.split("/")
       parts.reject! { |part| part.empty? }
+      handled_parts = parts_handler(parts)
 
+      regex = handled_parts[1].join("/")
+    
+      @rules.push({ regex: Regexp.new("^/#{regex}$"),
+                    vars: handled_parts[0], destination: destination,
+                    options: options })
+    end
+    
+    def resources(controller)
+      map ":controller/:id", default: { "action" => "show" }
+      map ":controller", default: { "action" => "index" }
+      map ":controller", default: { "action" => "new" }
+      map ":controller/:id", default: { "action" => "edit" }
+      map ":controller/:id", default: { "action" => "update" }
+      map ":controller", default: { "action" => "create" }
+      map ":controller/:id", default: { "action" => "destroy" }
+    end
+    
+    private
+
+    def option_setter(argArray)
+      options = {}
+      options = argArray.pop if argArray[-1].is_a?(Hash)
+      options[:default] ||= {}
+      options
+    end
+
+    def destination_setter(args)
+      destination = nil
+      destination = args.pop if args.size > 0
+      raise "Too many args!" if args.size > 0
+      return destination
+    end
+    
+    def parts_handler(parts)
       vars, regex_parts = [], []
-
       parts.each do |part|
         case part[0]
         when ":"
           vars << part[1..-1]
-          puts ": vars => #{vars}"
           regex_parts << "([a-zA-Z0-9]+)"
-          puts ": regex => #{regex_parts}"
         when "*"
           vars << part[1..-1]
-          puts "* vars => #{vars}"
           regex_parts << "(.*)"
-          puts "* regex => #{regex_parts}"
         else
           regex_parts << part
-          puts "default regex => #{regex_parts}"
         end
       end
-
-      regex = regex_parts.join("/")
-      @rules.push({ regex: Regexp.new("^/#{regex}$"),
-                    vars: vars, destination: destination,
-                    options: options })
+      return [vars, regex_parts]
     end
   end
 end

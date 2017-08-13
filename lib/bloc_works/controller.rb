@@ -14,7 +14,7 @@ module BlocWorks
         rack_response = get_response
         [rack_response.status, rack_response.header, [rack_response.body].flatten]
       else
-        [200, {'Content-Type' => 'text/html'}, [text].flatten]
+        response(create_response_array(action))
       end
     end
       
@@ -47,7 +47,7 @@ module BlocWorks
       !@response.nil?
     end
       
-    def create_reponse_array(view, locals = {})
+    def create_response_array(view, locals= {})
       filename = File.join("app", "views", controller_dir, "#{view}.html.erb")
       template = File.read(filename)
       eruby = Erubis::Eruby.new(template)
@@ -61,6 +61,10 @@ module BlocWorks
       klass = self.class.to_s
       klass.slice!("Controller")
       BlocWorks.snake_case(klass)
+    end
+    
+    def redirect(*args)
+      response(create_response_array(*args), 302)
     end
   end
 end
